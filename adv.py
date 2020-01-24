@@ -80,9 +80,20 @@ def opposite_direction(direction):
 
 def convert_path(path):
     room_ids = []
+    directions = []
+    next_room = None
     for room in path:
         room_ids.append(room.id)
-    print("PATH IDs", room_ids)
+
+    for i, room_id in enumerate(room_ids):
+        if i < len(room_ids) - 1:
+            next_room = room_ids[i+1]
+        direction = [dir for dir, room in graph[room_id].items()
+                     if room == next_room]
+        if len(direction) > 0:
+            directions.append(direction[0])
+    print("DIRECTIONS", directions)
+    return directions
 
 
 def find_shortest_path(starting_room):
@@ -92,10 +103,9 @@ def find_shortest_path(starting_room):
     while queue.size() > 0:
         path = queue.dequeue()
         room = path[-1]
-        # if there is a valid room (?) then return
+        # if there is a valid room (?) then return path to take
         if valid_direction(room) is not None:
-            print("PATH!!!", path)
-            return convert_path(path)  # need to convert this
+            return convert_path(path)
         if room.id not in visited:
             visited.add(room.id)
             for direction in graph[room.id]:
@@ -119,7 +129,6 @@ def traverse():
             graph[original_room][direction] = player.current_room.id
             print("ENDS", player.current_room.id)
 
-            # if the room isn't in the graph, add it
             if player.current_room.id not in graph:
                 add_room()
                 graph[player.current_room.id][opposite_direction(
@@ -128,6 +137,7 @@ def traverse():
         else:
             path = find_shortest_path(player.current_room)
             print("Shortest path", path)
+            return path
             # go to valid room
             # restart the process ???
 
