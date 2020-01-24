@@ -61,7 +61,10 @@ def valid_direction(room):
     for direction in graph[room.id]:
         if graph[room.id][direction] == '?':
             options.append(direction)
-    return random.choice(options)
+    if len(options) > 0:
+        return random.choice(options)
+    else:
+        return None
 
 
 def opposite_direction(direction):
@@ -75,33 +78,58 @@ def opposite_direction(direction):
         return 'e'
 
 
-def find_shortest_path():
-    pass
+def convert_path(path):
+    room_ids = []
+    for room in path:
+        room_ids.append(room.id)
+    print("PATH IDs", room_ids)
+
+
+def find_shortest_path(starting_room):
+    queue = Queue()
+    queue.enqueue([starting_room])
+    visited = set()
+    while queue.size() > 0:
+        path = queue.dequeue()
+        room = path[-1]
+        # if there is a valid room (?) then return
+        if valid_direction(room) is not None:
+            print("PATH!!!", path)
+            return convert_path(path)  # need to convert this
+        if room.id not in visited:
+            visited.add(room.id)
+            for direction in graph[room.id]:
+                new_room = room.get_room_in_direction(direction)
+                new_path = path + [new_room]
+                queue.enqueue(new_path)
 
 
 def traverse():
     if len(graph) == 0:
         add_room()
-    # while len(graph) < len(room_graph):
-    original_room = player.current_room.id
-    direction = valid_direction(player.current_room)
-    print(direction, "STARTS", player.current_room.id)
-    player.travel(direction)
-    graph[original_room][direction] = player.current_room.id
-    print("ENDS", player.current_room.id)
 
-    # if the room isn't in the graph, add it
-    if player.current_room.id not in graph:
-        add_room()
-        graph[player.current_room.id][opposite_direction(
-            direction)] = original_room
+    while len(graph) < len(room_graph):
+        original_room = player.current_room.id
+        direction = valid_direction(player.current_room)
 
-    print("TEST", graph[player.current_room.id][opposite_direction(direction)])
-    print("OPPOSITE", opposite_direction('s'))
-    print("EXITS", player.current_room.get_exits())
-    # set opposite direction of current room to previous room
+        if direction is not None:
+            print(direction, "STARTS", player.current_room.id)
+            player.travel(direction)
+            traversal_path.append(direction)
+            graph[original_room][direction] = player.current_room.id
+            print("ENDS", player.current_room.id)
 
+            # if the room isn't in the graph, add it
+            if player.current_room.id not in graph:
+                add_room()
+                graph[player.current_room.id][opposite_direction(
+                    direction)] = original_room
     # else find a new room with a valid room
+        else:
+            path = find_shortest_path(player.current_room)
+            print("Shortest path", path)
+            # go to valid room
+            # restart the process ???
 
 
 traverse()
