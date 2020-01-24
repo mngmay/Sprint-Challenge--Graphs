@@ -14,8 +14,8 @@ world = World()
 # map_file = "maps/test_line.txt"
 # map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
-map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+# map_file = "maps/test_loop_fork.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph = literal_eval(open(map_file, "r").read())
@@ -92,7 +92,6 @@ def convert_path(path):
                      if room == next_room]
         if len(direction) > 0:
             directions.append(direction[0])
-    print("DIRECTIONS", directions)
     return directions
 
 
@@ -123,11 +122,9 @@ def traverse():
         direction = valid_direction(player.current_room)
 
         if direction is not None:
-            print(direction, "STARTS", player.current_room.id)
             player.travel(direction)
             traversal_path.append(direction)
             graph[original_room][direction] = player.current_room.id
-            print("ENDS", player.current_room.id)
 
             if player.current_room.id not in graph:
                 add_room()
@@ -136,10 +133,9 @@ def traverse():
     # else find a new room with a valid room
         else:
             path = find_shortest_path(player.current_room)
-            print("Shortest path", path)
-            return path
-            # go to valid room
-            # restart the process ???
+            for d in path:
+                player.travel(d)
+                traversal_path.append(d)
 
 
 traverse()
