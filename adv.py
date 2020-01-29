@@ -31,6 +31,8 @@ player = Player(world.starting_room)
 traversal_path = []
 graph = {}
 
+# attempts = []
+
 
 class Queue():
     def __init__(self):
@@ -58,25 +60,22 @@ def add_room():
 
 def valid_direction(room):
     options = []
+    current_direction = None
     for direction in graph[room.id]:
         if graph[room.id][direction] == '?':
             options.append(direction)
+    if len(traversal_path) > 0:
+        current_direction = traversal_path[-1]
     if len(options) > 0:
         return random.choice(options)
+        if current_direction in options:
+            return current_direction
+        else:
+            return random.choice(options)
     else:
         return None
 
-
-def opposite_direction(direction):
-    if direction == 's':
-        return 'n'
-    elif direction == 'n':
-        return 's'
-    elif direction == 'e':
-        return 'w'
-    elif direction == 'w':
-        return 'e'
-
+opposite_direction = {'s':'n', 'n':'s', 'e':'w', 'w':'e'}
 
 def convert_path(path):
     room_ids = []
@@ -102,7 +101,6 @@ def find_shortest_path(starting_room):
     while queue.size() > 0:
         path = queue.dequeue()
         room = path[-1]
-        # if there is a valid room (?) then return path to take
         if valid_direction(room) is not None:
             return convert_path(path)
         if room.id not in visited:
@@ -128,9 +126,8 @@ def traverse():
 
             if player.current_room.id not in graph:
                 add_room()
-                graph[player.current_room.id][opposite_direction(
-                    direction)] = original_room
-    # else find a new room with a valid room
+                graph[player.current_room.id][opposite_direction[direction]] = original_room
+
         else:
             path = find_shortest_path(player.current_room)
             for d in path:
@@ -138,8 +135,23 @@ def traverse():
                 traversal_path.append(d)
 
 
+
+# def best_path(traversal_path):
+#     print("INITIAL", traversal_path)
+#     while len(traversal_path) > 960:
+#       # need to reset the position to room 0
+#         traversal_path = []
+#         traverse()
+#         print("TEST", traversal_path)
+
+#     return traversal_path
+
+# print("BEST", best_path(traversal_path))
+
+# traversal_path = best_path(traversal_path)
 traverse()
-print("GRAPH", graph)
+
+
 # TRAVERSAL TEST
 visited_rooms = set()
 player.current_room = world.starting_room
